@@ -1,12 +1,21 @@
 // INTERFACE ACTIONS
-document.addEventListener('keydown', function(e) {
-    switch(e.code) {
+document.addEventListener('keydown', function (e) {
+    switch (e.code) {
         case "KeyS":
-            console.log(tempSpace);
             simulationStep();
             drawCells();
-            console.log(space);
             console.log('step');
+            break;
+        case "Space":
+            if(simulation != null) {
+                window.clearInterval(simulation);
+                simulation = null;
+            } else {
+                simulation = setInterval(function () {
+                    simulationStep();
+                    drawCells();
+                }, 500);
+            }
             break;
         default:
             break;
@@ -17,8 +26,6 @@ document.addEventListener('keydown', function(e) {
 const canvas = document.getElementById('main-canvas');
 const ctx = canvas.getContext('2d');
 
-// canvas.width = 300;
-// canvas.height = 180;
 
 const SIZE_UNIVERSE = 50;
 const SIZE_CELL = 12;
@@ -35,13 +42,8 @@ let tempSpace = [
     []
 ];
 
-// Draw background
-ctx.fillStyle = C_DEAD;
-ctx.fillRect(0, 0, canvas.width, canvas.height);
-
 
 space = Array(SIZE_UNIVERSE).fill().map(() => Array(SIZE_UNIVERSE).fill(0));
-
 tempSpace = Array(SIZE_UNIVERSE).fill().map(() => Array(SIZE_UNIVERSE).fill(0));
 
 // Initialize Universe
@@ -56,22 +58,24 @@ const offsetY = 2;
 for (let i = 0; i < glider.length; i++) {
     for (let j = 0; j < glider[0].length; j++) {
         space[offsetX + i][offsetY + j] = glider[i][j];
-        
+
     }
 }
-console.log(space);
+
 
 
 
 function simulationStep() {
+    // Simulate padded matrix cells
+
     for (let row = 1; row < space.length - 1; row++) {
         for (let col = 1; col < space[row].length - 1; col++) {
             processCellState(row, col, getCellNeighbours(row, col));
         }
     }
 
-    for (let row = 0; row < tempSpace.length; row++) {
-        for (let col = 0; col < tempSpace.length; col++) {
+    for (let row = 1; row < tempSpace.length - 1; row++) {
+        for (let col = 1; col < tempSpace.length - 1; col++) {
             space[row][col] = tempSpace[row][col];
         }
     }
@@ -114,7 +118,7 @@ function processCellState(row, col, neighboursNumber) {
         tempSpace[row][col] = 0;
     } else if (neighboursNumber == 3) {
         tempSpace[row][col] = 1;
-    } else if(neighboursNumber == 2 && space[row][col] == 1){
+    } else if (neighboursNumber == 2 && space[row][col] == 1) {
         tempSpace[row][col] = 1;
     } else {
         // Do nothing
@@ -126,3 +130,7 @@ function main() {
 }
 
 main();
+let simulation = setInterval(function () {
+    simulationStep();
+    drawCells();
+}, 500);
